@@ -1,0 +1,144 @@
+{
+  "registry": "avok-attest-reserved-lists-v1",
+  "registry_version": "2026.11.2",
+  "reserved_prefixes": [
+    "ca.avoksystems.attest."
+  ],
+  "lists": [
+    {
+      "trust_list_id": "ca.avoksystems.attest.pilot",
+      "description": "Avok Attest pilot trust list",
+      "anchors": [
+        {
+          "sha256": "383db6cfad937c250d9c1d0973839a7d12bd99bdbfdd3f3ad234deda1f156b25",
+          "name": "Avok Attest pilot root",
+          "purposes": [
+            "daur-signing"
+          ],
+          "required": true
+        },
+        {
+          "sha256": "ca0b1554ecd901ea19dcad8749e9f2648c8d6dfcea1add9d2c2109415bb82ccd",
+          "name": "DigiCert Trusted G4 TimeStamping RSA4096 SHA256 2025 CA1",
+          "purposes": [
+            "time-stamping"
+          ],
+          "required": false
+        },
+        {
+          "sha256": "b53ac15cc1afb6e2ac06828f555bb3bf5bad8b2bac1733ce4cb7aafe729356de",
+          "name": "Sectigo Public Time Stamping Root R46",
+          "purposes": [
+            "time-stamping"
+          ],
+          "required": false
+        },
+        {
+          "sha256": "6afbc07c724c6f75c7743392f32bf5780bd5dd39268544d4882e7aec1add0282",
+          "name": "GlobalSign Timestamping Root R45",
+          "purposes": [
+            "time-stamping"
+          ],
+          "required": false
+        }
+      ]
+    },
+    {
+      "trust_list_id": "ca.avoksystems.attest.test",
+      "description": "Avok Attest test trust list (published key); always a test list",
+      "anchors": [
+        {
+          "sha256": "162f2b2103eafcb1a233310772b8195923a2a4e5f57a418b198360a0dec717ca",
+          "name": "Avok Attest TEST Root (published key)",
+          "purposes": [
+            "daur-signing",
+            "time-stamping"
+          ],
+          "required": true
+        },
+        {
+          "sha256": "5ed687a23edbc7eb3f41686f1b19cb087e2850bc60423c569d271cfbf8d7a709",
+          "name": "Avok Attest TEST Time-Stamping Root (published key)",
+          "purposes": [
+            "time-stamping"
+          ],
+          "required": false
+        }
+      ]
+    }
+  ],
+  "test_keys": [
+    {
+      "name": "intermediate-ca",
+      "spki_sha256": "07cf666da238579728ffa9fca8397b2ef1ca320086130f755818ffdb6df9c7c0"
+    },
+    {
+      "name": "pilot-root",
+      "spki_sha256": "0f8cbfa9b2344b71deb4e2127c871bf554451d85d5bef3c618b05363145982d4"
+    },
+    {
+      "name": "signer-debarred",
+      "spki_sha256": "8b9f41435b487ad4f231b6d9cd1cdb1f3bc5bc4a01473e204ccd15860060a6ae"
+    },
+    {
+      "name": "signer-ed25519",
+      "spki_sha256": "21ce7cb348bbdc60a30658262f01316411bd6ecffb55492c7cc4e980832e9e48"
+    },
+    {
+      "name": "signer-expired",
+      "spki_sha256": "3371b55f0a089571466ed4cf26e25f9b555dfd33686ae058badce9b921f1b252"
+    },
+    {
+      "name": "signer-intermediate",
+      "spki_sha256": "6201d37022e0baeaf314e502d4a80a608e75a9bd1a437739c11500fea165a1f6"
+    },
+    {
+      "name": "signer-later",
+      "spki_sha256": "82606e6ce4ae3b650bd1b5855a7c407e426fdbd193581f7c1c5e76078b22b875"
+    },
+    {
+      "name": "signer-revoked",
+      "spki_sha256": "58bcc421f60866d3823a5e2b69586abaa8231682b8a2ec564f5824d41c944ef0"
+    },
+    {
+      "name": "signer-seal",
+      "spki_sha256": "100f45682828747edda9cd7811354747f0d014db2615718afb695a70e846521f"
+    },
+    {
+      "name": "signer-under-tsa-root",
+      "spki_sha256": "46c423c4c2208943ecc4665121b9ac733f8aef0b45b3f596b4aca0b589b59389"
+    },
+    {
+      "name": "signer",
+      "spki_sha256": "0089e11082172dcb65bbac03e02f6adf01102fe5d04bbeb24d61db317459ec71"
+    },
+    {
+      "name": "tsa-overloaded",
+      "spki_sha256": "b092710590699e400feb0beb62052fa949856f8f318b0e3a8fba45b6efce1657"
+    },
+    {
+      "name": "tsa-rsa-root",
+      "spki_sha256": "2d3a6a1d7579c6d5fa502665472498144e792d48ef7d49cd8dd9582b27243526"
+    },
+    {
+      "name": "tsa-rsa",
+      "spki_sha256": "8ffe04204341c9eb1766fd01530080642f5e8c4334886a01ac0b9fc2c7f0218e"
+    },
+    {
+      "name": "tsa",
+      "spki_sha256": "67f732feef586946a2088257e61342806ec07cfc34b4284b5ad95e116f392181"
+    },
+    {
+      "name": "untrusted-root",
+      "spki_sha256": "a55210f1de84d92cc26c491a81b6d07062543bc8913109b870c9203a7341c4af"
+    },
+    {
+      "name": "untrusted-signer",
+      "spki_sha256": "e4f7eee04f0f792b095f9a8c3c4850ca43a564ed55f8d590215d66e7bd6e1423"
+    },
+    {
+      "name": "wrong",
+      "spki_sha256": "ef25f42555252bd62c27961863449e530067bf6b2a2bb02cbb8e4ebc868dd759"
+    }
+  ]
+}

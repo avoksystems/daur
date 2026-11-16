@@ -1,0 +1,285 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://avoksystems.ca/attest/schemas/daur-v0.2.schema.json",
+  "title": "Deliverable AI-Use Record (DAUR) v0.2",
+  "description": "A per-deliverable record of how AI was used to produce a document. Normative text: Avok Attest Specification v0.2. Two rules sit beside this schema and both verifiers check them: evidence identifiers and references (4.9), and, in a record of version 0.2, no control or bidirectional control character in any string except a line feed in the multi-line statements (4.1). Licence: CC BY 4.0.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "daur_version",
+    "deliverable",
+    "producer",
+    "ai_use",
+    "human_review",
+    "regime_references",
+    "declaration",
+    "created"
+  ],
+  "properties": {
+    "daur_version": { "enum": ["0.1", "0.2"] },
+    "deliverable": { "$ref": "#/$defs/deliverable" },
+    "producer": { "$ref": "#/$defs/producer" },
+    "ai_use": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/ai_use_entry" }
+    },
+    "human_review": { "$ref": "#/$defs/human_review" },
+    "regime_references": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/regime_reference" }
+    },
+    "declaration": { "$ref": "#/$defs/declaration" },
+    "created": { "$ref": "#/$defs/rfc3339" },
+    "evidence": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/evidence_entry" }
+    }
+  },
+  "allOf": [
+    {
+      "$comment": "Specification 4.9: evidence and evidence_refs exist from record version 0.2; a 0.1 record must not carry them.",
+      "if": { "required": ["daur_version"], "properties": { "daur_version": { "const": "0.1" } } },
+      "then": {
+        "properties": {
+          "evidence": false,
+          "ai_use": { "items": { "properties": { "evidence_refs": false } } },
+          "human_review": { "properties": { "evidence_refs": false } }
+        }
+      }
+    },
+    {
+      "$comment": "Specification 4.6: the method none exists from record version 0.2; a 0.1 record must use one of the first five methods.",
+      "if": { "required": ["daur_version"], "properties": { "daur_version": { "const": "0.1" } } },
+      "then": {
+        "properties": {
+          "human_review": { "properties": { "method": { "enum": ["full_read", "sampled", "citation_verification", "technical_check", "other"] } } }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "nonEmptyString": { "type": "string", "minLength": 1, "maxLength": 2000 },
+    "sha256hex": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "hexString": { "type": "string", "pattern": "^[0-9a-f]+$" },
+    "evidenceId": { "type": "string", "pattern": "^E[1-9][0-9]{0,3}$" },
+    "evidenceRefs": { "type": "array", "items": { "$ref": "#/$defs/evidenceId" } },
+    "isoDate": { "type": "string", "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$" },
+    "rfc3339": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])[Tt]([01][0-9]|2[0-3]):[0-5][0-9]:([0-5][0-9]|60)(\\.[0-9]+)?([Zz]|[+-]([01][0-9]|2[0-3]):[0-5][0-9])$"
+    },
+    "deliverable": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["title", "contract_reference", "deliverable_id", "file_name", "file_sha256", "version", "media_type"],
+      "properties": {
+        "title": { "$ref": "#/$defs/nonEmptyString" },
+        "contract_reference": { "$ref": "#/$defs/nonEmptyString" },
+        "deliverable_id": { "$ref": "#/$defs/nonEmptyString" },
+        "file_name": { "type": "string", "minLength": 1, "maxLength": 255, "pattern": "^[^/\\\\]+$" },
+        "file_sha256": { "$ref": "#/$defs/sha256hex" },
+        "version": { "$ref": "#/$defs/nonEmptyString" },
+        "media_type": { "type": "string", "pattern": "^[A-Za-z0-9!#$&^_.+-]+/[A-Za-z0-9!#$&^_.+-]+$" }
+      }
+    },
+    "producer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["organisation", "accountable_person", "signing_certificate"],
+      "properties": {
+        "organisation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["legal_name", "jurisdiction", "business_number"],
+          "properties": {
+            "legal_name": { "$ref": "#/$defs/nonEmptyString" },
+            "jurisdiction": { "$ref": "#/$defs/nonEmptyString" },
+            "business_number": { "$ref": "#/$defs/nonEmptyString" }
+          }
+        },
+        "accountable_person": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name", "role"],
+          "properties": {
+            "name": { "$ref": "#/$defs/nonEmptyString" },
+            "role": { "$ref": "#/$defs/nonEmptyString" }
+          }
+        },
+        "signing_certificate": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["subject", "serial", "sha256_fingerprint"],
+          "properties": {
+            "subject": { "$ref": "#/$defs/nonEmptyString" },
+            "serial": { "$ref": "#/$defs/hexString" },
+            "sha256_fingerprint": { "$ref": "#/$defs/sha256hex" }
+          }
+        }
+      }
+    },
+    "region": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "ref"],
+      "dependentRequired": {
+        "sha256": ["extraction_method"],
+        "extraction_method": ["sha256"]
+      },
+      "properties": {
+        "type": { "enum": ["page_range", "heading", "section_id", "byte_range", "paragraph_range"] },
+        "ref": { "type": "string", "minLength": 1, "maxLength": 500 },
+        "sha256": { "$ref": "#/$defs/sha256hex" },
+        "extraction_method": { "type": "string", "minLength": 1, "maxLength": 200 }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "type": { "const": "page_range" } } },
+          "then": { "properties": { "ref": { "pattern": "^pages? [0-9]+(-[0-9]+)?$" } } }
+        },
+        {
+          "if": { "properties": { "type": { "const": "byte_range" } } },
+          "then": { "properties": { "ref": { "pattern": "^bytes [0-9]+-[0-9]+$" } } }
+        },
+        {
+          "if": { "properties": { "type": { "const": "paragraph_range" } } },
+          "then": { "properties": { "ref": { "pattern": "^paragraphs? [0-9]+(-[0-9]+)?$" } } }
+        }
+      ]
+    },
+    "ai_use_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tool", "model", "model_version", "provider", "hosting_jurisdiction",
+        "category", "extent", "locus", "data_exposed", "retention", "training_opt_out", "dates"
+      ],
+      "properties": {
+        "tool": { "$ref": "#/$defs/nonEmptyString" },
+        "model": { "$ref": "#/$defs/nonEmptyString" },
+        "model_version": { "$ref": "#/$defs/nonEmptyString" },
+        "provider": { "$ref": "#/$defs/nonEmptyString" },
+        "hosting_jurisdiction": { "$ref": "#/$defs/nonEmptyString" },
+        "category": {
+          "enum": [
+            "none", "research", "drafting", "editing", "translation", "summarisation",
+            "analysis", "code_generation", "image_generation", "other"
+          ]
+        },
+        "extent": { "enum": ["none", "minor", "substantial", "predominant"] },
+        "extent_percent": { "type": "number", "minimum": 0, "maximum": 100 },
+        "locus": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/region" }
+        },
+        "data_exposed": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["government_or_client_data", "classes"],
+          "properties": {
+            "government_or_client_data": { "type": "boolean" },
+            "classes": { "type": "array", "items": { "type": "string", "minLength": 1, "maxLength": 200 } }
+          }
+        },
+        "retention": { "$ref": "#/$defs/nonEmptyString" },
+        "training_opt_out": {
+          "oneOf": [ { "type": "boolean" }, { "const": "unknown" } ]
+        },
+        "dates": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["start", "end"],
+          "properties": {
+            "start": { "$ref": "#/$defs/isoDate" },
+            "end": { "$ref": "#/$defs/isoDate" }
+          }
+        },
+        "evidence_refs": { "$ref": "#/$defs/evidenceRefs" }
+      }
+    },
+    "human_review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["reviewer_role", "method", "date"],
+      "$comment": "Specification 4.6: statement is REQUIRED with every method except none, where it is OPTIONAL.",
+      "if": { "required": ["method"], "properties": { "method": { "const": "none" } } },
+      "else": { "required": ["statement"] },
+      "properties": {
+        "reviewer_role": { "$ref": "#/$defs/nonEmptyString" },
+        "method": { "enum": ["full_read", "sampled", "citation_verification", "technical_check", "other", "none"] },
+        "date": { "$ref": "#/$defs/isoDate" },
+        "statement": { "type": "string", "minLength": 1, "maxLength": 4000 },
+        "evidence_refs": { "$ref": "#/$defs/evidenceRefs" }
+      }
+    },
+    "evidence_entry": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "type", "description", "file_name", "media_type", "sha256"],
+      "properties": {
+        "id": { "$ref": "#/$defs/evidenceId" },
+        "type": { "enum": ["citation-check", "tool-log", "review-note", "other"] },
+        "description": { "$ref": "#/$defs/nonEmptyString" },
+        "file_name": { "type": "string", "minLength": 1, "maxLength": 255, "pattern": "^[^/\\\\]+$" },
+        "media_type": { "type": "string", "pattern": "^[A-Za-z0-9!#$&^_.+-]+/[A-Za-z0-9!#$&^_.+-]+$" },
+        "sha256": { "$ref": "#/$defs/sha256hex" },
+        "size": { "type": "integer", "minimum": 0 },
+        "created": { "$ref": "#/$defs/rfc3339" },
+        "produced_by": { "$ref": "#/$defs/nonEmptyString" },
+        "summary": {
+          "type": "object",
+          "propertyNames": { "pattern": "^[a-z][a-z0-9_]{0,63}$" },
+          "additionalProperties": {
+            "oneOf": [ { "type": "string", "maxLength": 2000 }, { "type": "integer", "minimum": 0 } ]
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": { "required": ["type", "summary"], "properties": { "type": { "const": "citation-check" } } },
+          "then": {
+            "properties": {
+              "summary": {
+                "required": ["references", "resolved", "unresolved", "not_checked"],
+                "properties": {
+                  "references": { "type": "integer", "minimum": 0 },
+                  "resolved": { "type": "integer", "minimum": 0 },
+                  "unresolved": { "type": "integer", "minimum": 0 },
+                  "not_checked": { "type": "integer", "minimum": 0 }
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "regime_reference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["regime", "answers"],
+      "properties": {
+        "regime": {
+          "enum": [
+            "GSAR_552_239_7001", "CA_SCM_2302", "CA_CEC_50", "US_COMMERCE_FAIR",
+            "USTDA_AI_CLAUSE", "UK_PPN_017", "TBS_GENAI_GUIDE", "NDAA_FY2026_S1532", "OTHER"
+          ]
+        },
+        "regime_name": { "type": "string", "maxLength": 300 },
+        "answers": {
+          "type": "object",
+          "propertyNames": { "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,63}$" },
+          "additionalProperties": { "type": "string", "maxLength": 4000 }
+        }
+      }
+    },
+    "declaration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["text", "template_id"],
+      "properties": {
+        "text": { "type": "string", "minLength": 1, "maxLength": 4000 },
+        "template_id": { "type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]{0,99}$" }
+      }
+    }
+  }
+}

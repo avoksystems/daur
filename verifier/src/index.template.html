@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; form-action 'none'; base-uri 'none'">
+<title>Avok Attest verifier</title>
+<style>
+/*__CSS__*/
+</style>
+</head>
+<body>
+<div class="test-bar" id="test-bar" role="alert" hidden>TEST RESULT (test trust list: proves nothing about any real signer)</div>
+<header>
+  <div class="brand">
+    <h1>Avok Attest verifier</h1>
+    <p class="tagline">Checks a Deliverable AI-Use Record (DAUR) against the delivered file. Runs entirely in this page: nothing is uploaded and no network request is made.</p>
+  </div>
+  <div class="trust-badge" id="trust-badge">
+    <span class="label">Trust list</span>
+    <span class="value" id="trust-version">__TRUST_VERSION__</span>
+    <span class="label">Verifier build</span>
+    <span class="value" id="verifier-version">__VERIFIER_VERSION__ (__BUILD_HASH__)</span>
+  </div>
+</header>
+
+<main>
+  <section class="card" id="inputs">
+    <h2>1. Files</h2>
+    <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-describedby="drop-help">
+      <p id="drop-help"><strong>Drop the deliverable and its <code>.daur.cose</code> (or <code>.daur.json</code>) here</strong>, press Enter here to choose both, or choose them below.</p>
+      <input type="file" id="file-any" multiple hidden>
+      <div class="file-row">
+        <label>Deliverable <input type="file" id="file-deliverable"></label>
+        <label>Envelope <input type="file" id="file-envelope" accept=".cose,.json,.daur.cose,.daur.json"></label>
+      </div>
+      <ul class="chosen" id="chosen"></ul>
+      <p class="drop-message" id="drop-message" role="alert" hidden></p>
+    </div>
+    <div class="dropzone evidence-zone" id="evidence-zone" tabindex="0" role="button" aria-describedby="evidence-help">
+      <p id="evidence-help"><strong>Evidence files (optional)</strong>: drop here the files delivered beside the record (a citation check, a tool log, a review note), press Enter here to choose them, or choose them below. Each is checked against the record by its SHA-256; its content is not judged.</p>
+      <div class="file-row">
+        <label>Evidence <input type="file" id="file-evidence" multiple></label>
+      </div>
+      <ul class="chosen" id="evidence-chosen"></ul>
+    </div>
+    <div class="controls">
+      <label>Profile
+        <select id="profile">
+          <option value="strict" selected>strict (time-stamp and revocation required)</option>
+          <option value="pilot">pilot (missing time-stamp and revocation data are only warnings)</option>
+        </select>
+      </label>
+      <label class="check"><span><input type="checkbox" id="allow-test-trust"> Test mode</span>
+        <span class="hint">accept a test trust list; results are labelled TEST</span>
+      </label>
+      <label class="fingerprint">Expected trust list fingerprint
+        <input type="text" id="trust-fingerprint" inputmode="text" spellcheck="false" autocomplete="off" placeholder="the 64 hexadecimal digits your contract names">
+        <span class="hint">only the fingerprint identifies a trust list; its name, identifier and version are labels anyone can copy</span>
+      </label>
+      <label class="fingerprint">Expected revocation list fingerprint (optional)
+        <input type="text" id="crl-fingerprint" inputmode="text" spellcheck="false" autocomplete="off" placeholder="the SHA-256 of the current revocation list, if your contracting authority publishes it">
+        <span class="hint">the trust list fingerprint does not cover revocation lists; load the current list under Trust list and enter its SHA-256 here (several separated by commas)</span>
+      </label>
+      <button id="verify" disabled>Verify</button>
+      <button id="clear" class="secondary">Clear</button>
+    </div>
+  </section>
+
+  <section class="card" id="result-card" hidden>
+    <h2>2. Result</h2>
+    <p class="print-stamp" id="print-stamp"></p>
+    <div class="banner" id="banner" role="status" aria-live="polite" tabindex="-1"></div>
+    <p class="issued-to" id="issued-to" hidden></p>
+    <p class="timestamp-line" id="timestamp-line" hidden></p>
+    <p class="revocation-line" id="revocation-line" hidden></p>
+    <p class="region-line" id="region-line" hidden></p>
+    <ul class="findings" id="findings"></ul>
+    <div id="evidence-section" hidden>
+      <h3>Evidence</h3>
+      <p class="note">Files the producer made and bound to the record by hash. This page checks that a supplied file is the one bound to the record and, for a citation check, that it was made for this deliverable and carries the counts the record states. It never checks that the content is true: to check the citations yourself, run <code>daur evidence citations</code> on the deliverable.</p>
+      <ul class="evidence-list" id="evidence-list"></ul>
+    </div>
+    <details id="details-box">
+      <summary>Signer, time and checks</summary>
+      <dl id="details"></dl>
+    </details>
+    <h3 id="statement-heading">What the producer declared</h3>
+    <pre class="statement" id="statement"></pre>
+    <details>
+      <summary>Signed record (JSON)</summary>
+      <pre class="record" id="record"></pre>
+    </details>
+  </section>
+
+  <section class="card" id="trust-card">
+    <h2>3. Trust list</h2>
+    <p>Roots the verifier accepts. Bundled list: <strong id="trust-summary"></strong>. To use another list, choose its <code>.pem</code> roots file and its manifest <code>.json</code>. The bundled page carries no current revocation list: load the operator's latest one below.</p>
+    <ul id="trust-roots" class="roots"></ul>
+    <div class="file-row">
+      <label>Roots (.pem) <input type="file" id="trust-pem" accept=".pem,.crt,.cer"></label>
+      <label>Manifest (.json) <input type="file" id="trust-manifest" accept=".json"></label>
+      <button id="trust-load" class="secondary">Load list</button>
+      <button id="trust-reset" class="secondary">Use bundled list</button>
+    </div>
+    <div class="file-row">
+      <label>Revocation lists (.crl, .crl.pem, .crl.der) <input type="file" id="trust-crls" multiple accept=".crl,.pem,.der"></label>
+    </div>
+    <p class="note" id="crl-note">No further revocation lists loaded.</p>
+    <p class="note" id="trust-note"></p>
+  </section>
+
+  <section class="card muted">
+    <h2>About</h2>
+    <p>This page checks: the file's SHA-256 against the signed record; the COSE_Sign1 signature (ES256 or Ed25519) with WebCrypto; the certificate chain to the trust list at the signing time; the RFC 3161 time-stamp (CMS signature, imprint and TSA chain); the revocation snapshot (CRLs; OCSP responses are not evaluated here), its protected commitment and the trust-list pin; retroactive invalidity dates; region hashes for byte ranges, Markdown headings and text paragraphs; and evidence files dropped beside the record, by SHA-256. PDF page and DOCX regions are reported as not recomputed in the browser; when the whole file matches, the page says the file is byte-identical to the one signed. Where the strict profile needs something this page cannot check (an OCSP-only revocation snapshot), the result is UNSUPPORTED: use the command-line verifier.</p>
+    <p>A PASS means the record is intact, signed by a certificate the trust list accepts, and bound to this exact file. It is a declaration by the producer: not an AI-detection result, not a certification, and not a judgement of the deliverable's quality. Designed to meet Avok Attest specification v0.2.</p>
+  </section>
+</main>
+<footer>Avok Systems Inc. Verifier source: Apache-2.0. Specification: CC BY 4.0.
+  <details class="notices" id="third-party-notices">
+    <summary>Third-party notices (__THIRD_PARTY_COUNT__ packages bundled into this page)</summary>
+    <pre>__THIRD_PARTY_NOTICES__</pre>
+  </details>
+</footer>
+<script>
+/*__JS__*/
+</script>
+</body>
+</html>

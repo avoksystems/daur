@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://avoksystems.ca/attest/trust-manifest-v0.2.schema.json",
+  "title": "Avok Attest trust list manifest (specification 10.2)",
+  "description": "The structure both reference verifiers require of a trust manifest before they read anything else from it. Three rules sit beside this schema because a schema cannot state them: the manifest is I-JSON (RFC 7493: no duplicate member names, no lone surrogates, and every number an integer from -(2^53-1) to 2^53-1), and no string, member names included, carries a C0 or C1 control character, DEL or a bidirectional control. A manifest that breaks any rule is TRUST_LIST_INVALID, FAIL in both profiles.",
+  "type": "object",
+  "required": [
+    "trust_list_id",
+    "trust_list_version",
+    "roots"
+  ],
+  "properties": {
+    "trust_list_id": {
+      "type": "string",
+      "maxLength": 128,
+      "pattern": "^[a-z0-9]+([.-][a-z0-9]+)*$"
+    },
+    "trust_list_name": {
+      "type": "string",
+      "maxLength": 300
+    },
+    "trust_list_version": {
+      "type": "string",
+      "maxLength": 64,
+      "pattern": "^[0-9]+(\\.[0-9]+)*(-[A-Za-z0-9._]+)?$"
+    },
+    "issued": {
+      "$ref": "#/$defs/time"
+    },
+    "generator": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
+    "roots": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/root"
+      }
+    },
+    "test": {
+      "type": "boolean"
+    },
+    "revocation_max_age": {
+      "type": "string",
+      "pattern": "^P([0-9]+D|T[0-9]+H)$"
+    },
+    "next_update": {
+      "$ref": "#/$defs/time"
+    },
+    "invalidity_dates": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/invalidity"
+      }
+    }
+  },
+  "$defs": {
+    "time": {
+      "type": "string",
+      "pattern": "^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}(\\.[0-9]+)?(Z|[+-][0-9]{2}:[0-9]{2})$"
+    },
+    "sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "root": {
+      "type": "object",
+      "required": [
+        "sha256_fingerprint"
+      ],
+      "properties": {
+        "subject": {
+          "type": "string"
+        },
+        "serial": {
+          "type": "string"
+        },
+        "sha256_fingerprint": {
+          "$ref": "#/$defs/sha256"
+        },
+        "not_before": {
+          "$ref": "#/$defs/time"
+        },
+        "not_after": {
+          "$ref": "#/$defs/time"
+        },
+        "pem_file": {
+          "type": "string"
+        },
+        "purposes": {
+          "type": "array",
+          "items": {
+            "enum": [
+              "daur-signing",
+              "time-stamping"
+            ]
+          }
+        }
+      }
+    },
+    "invalidity": {
+      "type": "object",
+      "required": [
+        "certificate_sha256",
+        "invalid_from"
+      ],
+      "properties": {
+        "certificate_sha256": {
+          "$ref": "#/$defs/sha256"
+        },
+        "invalid_from": {
+          "$ref": "#/$defs/time"
+        },
+        "reason": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "trust_list_id": "ca.avoksystems.attest.pilot",
+  "trust_list_name": "Avok Systems Inc. Attest trust list",
+  "trust_list_version": "2026.11.4",
+  "issued": "2026-11-10T10:05:36Z",
+  "generator": "daur 0.2.0",
+  "roots": [
+    {
+      "subject": "CN=Avok Systems Inc. Pilot Root CA,O=Avok Systems Inc.,C=CA",
+      "serial": "1",
+      "sha256_fingerprint": "383db6cfad937c250d9c1d0973839a7d12bd99bdbfdd3f3ad234deda1f156b25",
+      "not_before": "2026-11-09T18:50:24Z",
+      "not_after": "2036-11-09T18:50:24Z",
+      "pem_file": "avok-pilot-roots.pem",
+      "purposes": [
+        "daur-signing"
+      ]
+    },
+    {
+      "subject": "CN=DigiCert Trusted G4 TimeStamping RSA4096 SHA256 2025 CA1,O=DigiCert\\, Inc.,C=US",
+      "serial": "dc7ac5705ff21992e4043220c3a4986",
+      "sha256_fingerprint": "ca0b1554ecd901ea19dcad8749e9f2648c8d6dfcea1add9d2c2109415bb82ccd",
+      "not_before": "2025-05-07T00:00:00Z",
+      "not_after": "2038-01-14T23:59:59Z",
+      "pem_file": "avok-pilot-roots.pem",
+      "purposes": [
+        "time-stamping"
+      ]
+    },
+    {
+      "subject": "CN=Sectigo Public Time Stamping Root R46,O=Sectigo Limited,C=GB",
+      "serial": "36c2b0bd7c1b3ae7a3b3dd36cbc97568",
+      "sha256_fingerprint": "b53ac15cc1afb6e2ac06828f555bb3bf5bad8b2bac1733ce4cb7aafe729356de",
+      "not_before": "2021-03-22T00:00:00Z",
+      "not_after": "2038-01-18T23:59:59Z",
+      "pem_file": "avok-pilot-roots.pem",
+      "purposes": [
+        "time-stamping"
+      ]
+    },
+    {
+      "subject": "CN=GlobalSign Timestamping Root R45,O=GlobalSign nv-sa,C=BE",
+      "serial": "784aaa8173669c900954e421c947ebc0",
+      "sha256_fingerprint": "6afbc07c724c6f75c7743392f32bf5780bd5dd39268544d4882e7aec1add0282",
+      "not_before": "2020-12-09T00:00:00Z",
+      "not_after": "2034-12-10T00:00:00Z",
+      "pem_file": "avok-pilot-roots.pem",
+      "purposes": [
+        "time-stamping"
+      ]
+    }
+  ],
+  "invalidity_dates": [],
+  "notes": "Each root anchors the paths its purposes name: daur-signing for DAUR signing certificates, time-stamping for time-stamping certificates. A root outside its validity window at the signing time is not trusted. A certificate listed under invalidity_dates is rejected for signatures made at or after its invalid_from time.",
+  "revocation_max_age": "P8D",
+  "next_update": "2027-02-28T00:00:00Z"
+}

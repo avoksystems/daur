@@ -1,0 +1,333 @@
+{
+  "version": "0.2",
+  "description": "Every result code of specification 11.7 with its class, a one-sentence meaning and what to do next. Used by the command line, the browser verifier and the statement PDF.",
+  "classes": {
+    "fail": "FAIL in both profiles",
+    "warn": "WARN in both profiles",
+    "profile": "FAIL in the strict profile, WARN in the pilot profile",
+    "info": "informational, not part of the outcome",
+    "outcome": "an outcome of its own (11.2)"
+  },
+  "codes": {
+    "HASH_MISMATCH": {
+      "class": "fail",
+      "meaning": "This is not the file the record describes: its bytes differ from the file that was signed.",
+      "next": "Ask the producer for the exact file that was delivered with this record, or for a record made for this file."
+    },
+    "SIGNATURE_INVALID": {
+      "class": "fail",
+      "meaning": "The record's signature does not verify, so the record was altered or was not signed by the certificate it carries.",
+      "next": "Do not rely on the record; ask the producer for a new signed record."
+    },
+    "UNTRUSTED_ROOT": {
+      "class": "fail",
+      "meaning": "The signing certificate does not lead to a root that this trust list accepts for signing records.",
+      "next": "Check that you used the trust list your contract names; otherwise treat the signer as unknown."
+    },
+    "CERT_EXPIRED_AT_SIGNING": {
+      "class": "fail",
+      "meaning": "A certificate in the signer's chain was not valid at the signing time.",
+      "next": "Do not rely on the record; ask the producer to sign again with a valid certificate."
+    },
+    "CERT_REVOKED_AT_SIGNING": {
+      "class": "fail",
+      "meaning": "The signing certificate had been revoked at or before the signing time.",
+      "next": "Do not rely on the record; contact the producer and the certificate authority."
+    },
+    "CERT_INVALID_RETROACTIVELY": {
+      "class": "fail",
+      "meaning": "The trust list declares a certificate in the chain invalid from a time at or before the signing time.",
+      "next": "Do not rely on the record; the trust list operator withdrew that certificate."
+    },
+    "TIMESTAMP_MISSING": {
+      "class": "profile",
+      "meaning": "The record carries no time-stamp from a time-stamping authority, so the signing time is the signer's own claim.",
+      "next": "Ask the producer to sign again with a time-stamp from a public time-stamping authority."
+    },
+    "TIMESTAMP_INVALID": {
+      "class": "fail",
+      "meaning": "The time-stamp is present but does not verify, or its authority is not listed for time-stamping.",
+      "next": "Do not rely on the signing time; ask the producer to sign again with a valid time-stamp."
+    },
+    "RECORD_ALTERED": {
+      "class": "fail",
+      "meaning": "The record shown beside the signature differs from the record that was signed.",
+      "next": "Read only the signed record; ask the producer why the copy differs."
+    },
+    "REGION_HASH_MISMATCH": {
+      "class": "fail",
+      "meaning": "The file was changed, and these named parts of it differ from what was signed.",
+      "next": "Ask the producer for the file that was delivered with this record."
+    },
+    "SCHEMA_INVALID": {
+      "class": "fail",
+      "meaning": "The signed record does not have the structure the specification requires.",
+      "next": "Ask the producer for a record made with a tool that follows the specification."
+    },
+    "ENVELOPE_MALFORMED": {
+      "class": "fail",
+      "meaning": "The signature file cannot be read as a record envelope.",
+      "next": "Check that you chose the .daur.cose or .daur.json file; otherwise ask the producer for it again."
+    },
+    "CHAIN_INVALID": {
+      "class": "fail",
+      "meaning": "A certificate in the chain breaks the certificate rules (wrong purpose, missing key usage, or a SHA-1 or MD5 signature).",
+      "next": "Do not rely on the record; ask the producer to sign with a certificate issued for record signing."
+    },
+    "SIGNER_MISMATCH": {
+      "class": "fail",
+      "meaning": "The record names a different signing certificate than the one that signed it.",
+      "next": "Do not rely on the record; ask the producer for a correctly signed record."
+    },
+    "PRODUCER_ORG_DIFFERS": {
+      "class": "profile",
+      "meaning": "The organisation named in the record is not the one the signing certificate was issued to, or the certificate does not carry exactly one organisation.",
+      "next": "Treat the organisation in the record as unconfirmed; ask the producer to sign with its own organisation's certificate."
+    },
+    "ACCOUNTABLE_PERSON_DIFFERS": {
+      "class": "profile",
+      "meaning": "The record names an accountable person who is not the person the signing certificate was issued to; only an organisation seal certificate lets the organisation name the person.",
+      "next": "Ask the producer for a record signed by the accountable person's own certificate, or by the organisation's seal certificate."
+    },
+    "SOURCE_HASH_NOT_CHECKED": {
+      "class": "profile",
+      "meaning": "A C2PA carrier was read without the original file, so only the hashed text regions were checked.",
+      "next": "Ask for the original file and verify it with the record."
+    },
+    "C2PA_SIGNER_UNTRUSTED": {
+      "class": "profile",
+      "meaning": "The C2PA manifest was signed with a key that does not lead to a signing root of the trust list.",
+      "next": "Rely on the record's own signature only, and verify the original file."
+    },
+    "C2PA_SIGNER_DIFFERS": {
+      "class": "profile",
+      "meaning": "The C2PA manifest was signed by someone other than the record's signer.",
+      "next": "Rely on the record's own signature only, and verify the original file."
+    },
+    "REVOCATION_MISSING": {
+      "class": "profile",
+      "meaning": "No revocation data shows that the signing certificate was not revoked at the signing time.",
+      "next": "Ask the producer to sign again with a current revocation list, or verify with a later revocation list from the trust list operator."
+    },
+    "REVOCATION_STALE": {
+      "class": "warn",
+      "meaning": "Revocation data is present but too old, or does not cover the signing time.",
+      "next": "Verify again with a later revocation list from the trust list operator."
+    },
+    "REVOCATION_SNAPSHOT_MISMATCH": {
+      "class": "profile",
+      "meaning": "The revocation data in the envelope is not the data the signer committed to, or was added after signing.",
+      "next": "Do not rely on the stapled revocation data; verify with a revocation list from the trust list operator."
+    },
+    "TEST_TRUST_LIST": {
+      "class": "fail",
+      "meaning": "The trust list is a test list whose key is public, so it proves nothing about any real signer.",
+      "next": "Verify with the trust list your contract names."
+    },
+    "TRUST_LIST_FINGERPRINT_MISMATCH": {
+      "class": "fail",
+      "meaning": "The trust list you loaded is not the one you said to expect: its fingerprint differs from the expected trust list fingerprint.",
+      "next": "Load the trust list whose fingerprint your contract or contracting authority names, then verify again."
+    },
+    "TRUST_LIST_ID_RESERVED": {
+      "class": "fail",
+      "meaning": "The trust list claims an identifier reserved for Avok Attest's own lists, but its roots are not exactly the registered root set, so it is impersonating that list.",
+      "next": "Do not use this trust list; obtain the list your contract names and check its fingerprint."
+    },
+    "TRUST_LIST_INVALID": {
+      "class": "profile",
+      "meaning": "The trust list has no manifest, or its manifest breaks the rules of the specification (an identifier outside the allowed characters, a member of the wrong type, a number a reader may round, a hidden control character), so nothing in it can be relied on.",
+      "next": "Use the trust directory your contract names, with its manifest, and check its fingerprint against the one your contract names."
+    },
+    "VALIDITY_JUDGED_AT_CREATED": {
+      "class": "warn",
+      "meaning": "The signing time was taken from the signer's own clock, not from a time-stamp.",
+      "next": "Treat the signing time as the signer's claim."
+    },
+    "TIMESTAMP_BEFORE_CREATED": {
+      "class": "warn",
+      "meaning": "The time-stamp is more than five minutes earlier than the record's own creation time.",
+      "next": "Ask the producer why the clocks differ."
+    },
+    "STALE_TRUST_STATE": {
+      "class": "warn",
+      "meaning": "Your trust list is older than the version the signer used.",
+      "next": "Get the current trust list from its operator and verify again."
+    },
+    "TRUST_LIST_DIGEST_DIFFERS": {
+      "class": "warn",
+      "meaning": "Your trust list has the same name and version as the signer's but different content.",
+      "next": "Get the trust list again from its operator and verify again."
+    },
+    "TRUST_LIST_VERSION_UNORDERED": {
+      "class": "warn",
+      "meaning": "The versions of your trust list and the signer's cannot be compared.",
+      "next": "Check with the trust list operator which version is current."
+    },
+    "TRUST_PIN_UNCHECKED": {
+      "class": "warn",
+      "meaning": "The trust list has no manifest, so the signer's trust list reference could not be compared.",
+      "next": "Use the trust directory your contract names, with its manifest."
+    },
+    "TRUST_PIN_MISSING": {
+      "class": "warn",
+      "meaning": "The signer did not record which trust list it used.",
+      "next": "No action is needed unless your contract requires it."
+    },
+    "SIGNER_DETAILS_DIFFER": {
+      "class": "warn",
+      "meaning": "The certificate is the one the record names, but the subject or serial text in the record is written differently.",
+      "next": "No action is needed; the certificate itself is bound by its fingerprint."
+    },
+    "REGION_NOT_RECOMPUTED": {
+      "class": "warn",
+      "meaning": "A declared part of the file could not be recomputed by this verifier.",
+      "next": "Use the command-line verifier, which recomputes every region type."
+    },
+    "REGION_UNHASHED": {
+      "class": "warn",
+      "meaning": "A part of the file is declared without a hash, so it cannot be checked.",
+      "next": "Treat that part's description as unverified."
+    },
+    "REGION_EXTRACTION_DIFFERS": {
+      "class": "warn",
+      "meaning": "The file is byte-identical to the one signed, but text extraction here gives different text for a region.",
+      "next": "No action is needed for the file; the difference lies in the text extractor."
+    },
+    "FILE_NAME_MISMATCH": {
+      "class": "warn",
+      "meaning": "The file's name differs from the name in the record; its content may still match.",
+      "next": "Check that the content check passed; a renamed file with matching content is the same file."
+    },
+    "FILE_NOT_CHECKED": {
+      "class": "warn",
+      "meaning": "No deliverable was supplied, so the file and its regions were not checked.",
+      "next": "Verify again with the deliverable."
+    },
+    "TIMESTAMP_NOT_VERIFIED": {
+      "class": "warn",
+      "meaning": "Reserved: a verifier that cannot validate time-stamps parsed the token without checking it.",
+      "next": "Use a verifier that validates time-stamps."
+    },
+    "TRUST_PIN_MATCH": {
+      "class": "info",
+      "meaning": "The signer used the same trust list and version as yours.",
+      "next": "No action is needed."
+    },
+    "TRUST_LIST_NEWER": {
+      "class": "info",
+      "meaning": "Your trust list is newer than the version the signer used.",
+      "next": "No action is needed."
+    },
+    "TRUST_LIST_ID_DIFFERS": {
+      "class": "info",
+      "meaning": "The signer referenced a different trust list than yours.",
+      "next": "No action is needed unless your contract names the signer's list."
+    },
+    "TRUST_LIST_PAST_NEXT_UPDATE": {
+      "class": "info",
+      "meaning": "The trust list's operator expected to publish a newer version by now.",
+      "next": "Check with the operator for a newer list."
+    },
+    "TRUST_LIST_FINGERPRINT_NOT_CHECKED": {
+      "class": "info",
+      "meaning": "No expected trust list fingerprint was given, so the verifier could not confirm which list it used; the identifier and version are only labels.",
+      "next": "Compare the fingerprint shown under the outcome with the one your contract or contracting authority names, or give it with --trust-fingerprint."
+    },
+    "TRUST_LIST_FINGERPRINT_MATCH": {
+      "class": "info",
+      "meaning": "The trust list you loaded has the fingerprint you said to expect.",
+      "next": "Nothing to do."
+    },
+    "TIMESTAMP_FROM_SIGNER_CA": {
+      "class": "info",
+      "meaning": "The time-stamp and the signing certificate chain to the same certificate authority, so the time comes from the signer's own side and is not independent of the signer.",
+      "next": "Treat the signing time as the signer's own statement; ask for a record time-stamped by an independent authority if the time matters."
+    },
+    "ACCOUNTABLE_PERSON_IN_CERT": {
+      "class": "info",
+      "meaning": "The accountable person in the record is the person named in the certificate.",
+      "next": "No action is needed."
+    },
+    "ACCOUNTABLE_PERSON_DECLARED": {
+      "class": "info",
+      "meaning": "The record was signed with an organisation seal certificate: the accountable person is named by the organisation and is not in the certificate.",
+      "next": "Treat the person's name as the organisation's declaration."
+    },
+    "REVOCATION_DECIDED_BY_LATER_CRL": {
+      "class": "info",
+      "meaning": "Revocation was decided by a revocation list issued at least 24 hours after the signing time; the result names the list, where it came from and its SHA-256.",
+      "next": "No action is needed."
+    },
+    "REVOCATION_DECIDED_BY_SNAPSHOT": {
+      "class": "info",
+      "meaning": "Revocation was decided by revocation data that covers the signing time, not by a later list; the result names it, where it came from and its SHA-256.",
+      "next": "When no later list was available, obtain the current revocation list from the trust list operator, not from the producer, and verify again with it."
+    },
+    "REVOCATION_NOT_EVALUATED": {
+      "class": "info",
+      "meaning": "Revocation was not evaluated because the certificate has no path to the trust list.",
+      "next": "See the failure that explains the missing path."
+    },
+    "CRL_NOT_THE_EXPECTED_ONE": {
+      "class": "fail",
+      "meaning": "You said to expect a revocation list with a given SHA-256, and no revocation list this check loaded has it, so the current list your contracting authority names was not used.",
+      "next": "Obtain the current revocation list from the trust list operator, load it beside the trust list, and verify again."
+    },
+    "CRL_FINGERPRINT_MATCH": {
+      "class": "info",
+      "meaning": "A revocation list this check loaded has the SHA-256 you said to expect.",
+      "next": "Nothing to do."
+    },
+    "CRL_UNREADABLE": {
+      "class": "info",
+      "meaning": "A revocation list given to the verifier could not be read and was ignored.",
+      "next": "Check the file you supplied."
+    },
+    "C2PA_STATE": {
+      "class": "info",
+      "meaning": "The validation state the C2PA library reported for the manifest.",
+      "next": "No action is needed."
+    },
+    "HEADER_LABEL_NOT_FOR_VERSION": {
+      "class": "info",
+      "meaning": "A DAUR header parameter sits under a label that belongs to another record version, so the verifier ignored it.",
+      "next": "Ask the producer to sign again with a current tool; until then treat the parameter as missing."
+    },
+    "EVIDENCE_HASH_MISMATCH": {
+      "class": "fail",
+      "meaning": "A file supplied under the name of an evidence entry is not the file the producer bound to the record: its SHA-256 differs.",
+      "next": "Ask the producer for the evidence file exactly as attached to the record; do not rely on the altered copy."
+    },
+    "EVIDENCE_NOT_FOR_THIS_FILE": {
+      "class": "fail",
+      "meaning": "The citation check supplied as evidence was made for another file, not for the deliverable this record describes.",
+      "next": "Ask the producer for the citation check of this deliverable, or run daur evidence citations on the deliverable yourself."
+    },
+    "EVIDENCE_SUMMARY_MISMATCH": {
+      "class": "fail",
+      "meaning": "The citation check supplied as evidence does not carry the counts the record states, so the record misstates its own evidence.",
+      "next": "Do not rely on the counts in the record; read the citation check, or run daur evidence citations on the deliverable yourself."
+    },
+    "EVIDENCE_UNKNOWN": {
+      "class": "warn",
+      "meaning": "A supplied file matches no evidence entry of the record by hash or by name.",
+      "next": "Check that you supplied the files that came with this record; the unknown file says nothing about it."
+    },
+    "EVIDENCE_MATCH": {
+      "class": "info",
+      "meaning": "A supplied evidence file is the one the record names: its SHA-256 equals the entry's.",
+      "next": "Read the file for its details; the verifier checks its integrity, not its truth."
+    },
+    "EVIDENCE_NOT_SUPPLIED": {
+      "class": "info",
+      "meaning": "The record names an evidence file that was not supplied, so its integrity was not checked.",
+      "next": "Ask the producer for the file if you need its details; its absence does not affect the outcome."
+    },
+    "UNSUPPORTED": {
+      "class": "outcome",
+      "meaning": "This verifier lacks a capability the profile requires for this record, so it cannot give a verdict.",
+      "next": "Use the command-line verifier, daur verify, which has every capability."
+    }
+  }
+}
